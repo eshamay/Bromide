@@ -1,3 +1,5 @@
+import numpy
+
 def window_smooth(x,window_len=11,window='hanning'):
 	"""smooth the data using a window with requested size.
     
