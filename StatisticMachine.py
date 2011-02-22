@@ -106,7 +106,7 @@ class StatisticMachine:
 		# p[0] = center
 		# p[1] = width
 		# p[2] = amplitude
-		return p[2]/sqrt(2.0*pi*p[1]*p[1]) * exp(-(x-p[0])*(x-p[0])/(2.0*p[1]*p[1]))
+		return p[2]/sqrt(2.0*pi*pow(p[1],2)) * exp(-0.5*pow((x-p[0])/p[1]),2)
 
 	# The voigt profile using a lookup table from J. Electron Spectrosc. Relat. Phenom. 69 (1994) 125-132
 	def voigt(self,x,p):
