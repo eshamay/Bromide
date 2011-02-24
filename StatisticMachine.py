@@ -100,13 +100,13 @@ class StatisticMachine:
 		# p[0] = center
 		# p[1] = width
 		# p[2] = amplitude
-		return p[2]*p[1]/( (x-p[0])*(x-p[0]) + p[1]*p[1])
+		return p[2]*p[1]/(pow(x-p[0],2) + pow(p[1],2))
 
 	def gaussian(self,x,p):
 		# p[0] = center
 		# p[1] = width
 		# p[2] = amplitude
-		return p[2]/sqrt(2.0*pi*pow(p[1],2)) * exp(-0.5*pow((x-p[0])/p[1]),2)
+		return p[2]/sqrt(2.0*pi*pow(p[1],2)) * exp(-0.5*pow((x-p[0])/p[1],2))
 
 	# The voigt profile using a lookup table from J. Electron Spectrosc. Relat. Phenom. 69 (1994) 125-132
 	def voigt(self,x,p):
@@ -169,6 +169,12 @@ class StatisticMachine:
 		# 3-5 = width
 		# 6-8 = amplitude
 		return self.lorentzian(x,[p[0], p[3], p[6]]) + self.lorentzian(x,[p[1], p[4], p[7]]) + self.lorentzian(x,[p[2], p[5], p[8]])
+
+	def double_gaussian_fit(self,x,p):
+		# 0-1 = center
+		# 2-3 = width
+		# 4-5 = amplitude
+		return self.gaussian(x,[p[0], p[2], p[4]]) + self.gaussian(x,[p[1], p[3], p[5]])
 
 	def triple_gaussian_fit(self,x,p):
 		# 0-2 = center

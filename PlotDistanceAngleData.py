@@ -27,9 +27,11 @@ zi = numpy.zeros((ynum,xnum))
 
 for c in cdfs:
 	new_data = numpy.array(griddata(c[0], c[1], c[2], xi, yi))
-	# normalize by the number of timesteps in the file
-	new_data = new_data / new_data.max(0)
+	#new_data = new_data / new_data.max(0)	# old normalization scheme - doesn't really work or make sense
 	zi = zi + new_data
+
+# normalize to max = 1, min = 0
+zi = zi / zi.max(0)
 
 fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
 im = plt.imshow(zi, extent=(xmin,xmax,ymax,ymin), interpolation='bilinear', figure=fig, aspect='auto')
@@ -43,7 +45,7 @@ im = plt.imshow(zi, extent=(xmin,xmax,ymax,ymin), interpolation='bilinear', figu
 
 
 xticks(fontsize=48)
-#plt.xlim(-10.0,15.0)
+plt.xlim(-10.0,15.0)
 plt.xlabel (r'Distance to water slab surface / $\AA$', fontsize=64)
 
 
