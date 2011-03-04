@@ -1,20 +1,19 @@
 import sys
 from glob import glob
 from ColumnDataFile import ColumnDataFile as CDF
-#import matplotlib.pyplot as plt
-#from pylab import *
+import matplotlib.pyplot as plt
+from pylab import *
 from numpy import array, interp, linspace, zeros
-#from scipy import interpolate
 from operator import itemgetter
-#import PlotUtility
+import PlotUtility
 
 # load all of the files for the analysis and parse out the columns of data
-files = glob(sys.argv[1]+'*.dat')
+files = glob(sys.argv[1:])
 #files = glob(sys.argv[1])
 cdf = [CDF(f) for f in files]
 
-#fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
-#axs = fig.add_subplot(1,1,1)
+fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
+axs = fig.add_subplot(1,1,1)
 
 # create a common x axis for interpolation across all the data sets
 num_columns = 3
