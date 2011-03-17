@@ -4,10 +4,7 @@ from ColumnDataFile import ColumnDataFile as CDF
 from StatisticMachine import StatisticMachine as SM
 import matplotlib.pyplot as plt
 from scipy.optimize import leastsq
-#from pylab import *
 from numpy import array, arange
-#from scipy import interpolate
-#from operator import itemgetter
 import PlotUtility
 
 sm = SM()
@@ -19,7 +16,7 @@ cdf = CDF(file[0],header=True)
 fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
 axs = fig.add_subplot(1,1,1)
 
-dr = 0.25					# thickness of each slice of the system
+dr = 0.1					# thickness of each slice of the system
 const = 30.0*30.0*dr*6.02e23*1.0e-24 				# conversion factor to g/mL
 mass = {'S':64.0644, 'O':18.002}
 axs.plot(cdf['position'], array(cdf['O'])*mass['O']/const, color='k', linestyle=':', label=r'H$_2$O', linewidth=2.0)
@@ -34,9 +31,9 @@ print plsq[0]
 gauss_y = sm.double_gaussian_fit(array(cdf['position']),plsq[0])
 axs.plot(cdf['position'], gauss_y, linewidth=1.5, color='k', label='Gaussian Fit')
 
-plt.xlim(-50.0,20.0)
+plt.xlim(-5.0,120.0)
 plt.xticks(fontsize=44)
-plt.xlabel (r'Distance to Top Surface / $\AA$', fontsize=58)
+plt.xlabel (r'Position / $\AA$', fontsize=58)
 
 plt.ylim(0.0,1.2)
 plt.yticks(fontsize=44)
