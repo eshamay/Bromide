@@ -1,4 +1,5 @@
 import numpy
+import scipy.signal.gaussian
 
 def window_smooth(x,window_len=11,window='hanning'):
 	"""smooth the data using a window with requested size.
@@ -50,6 +51,8 @@ def window_smooth(x,window_len=11,window='hanning'):
 	#print(len(s))
 	if window == 'flat': #moving average
 		w=numpy.ones(window_len,'d')
+  elif window == 'gaussian':
+    w=scipy.signal.gaussian(window_len,window_len/4)
 	else:
 		w=eval('numpy.'+window+'(window_len)')
 
