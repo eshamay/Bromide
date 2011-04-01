@@ -80,7 +80,7 @@ yi = numpy.zeros(num)
 for c in cdfs:
 	yi = yi + c[1]
 
-#yi = yi / yi.sum()
+yi = yi / yi.max()
 #histo,edges = numpy.histogram(xi, weights=yi, normed=True, bins=400)
 
 fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
