@@ -68,6 +68,7 @@ def smooth(x,window_len=11,window='hanning'):
 
 
 files = glob.glob('dat/'+sys.argv[1]+'.*')
+#files = glob.glob(sys.argv[1])
 cdfs = [CDF(f) for f in files]
 
 num = len(cdfs[0][0])

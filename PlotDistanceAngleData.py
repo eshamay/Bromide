@@ -45,7 +45,7 @@ im = plt.imshow(zi, extent=(xmin,xmax,ymax,ymin), interpolation='bilinear', figu
 
 
 xticks(fontsize=48)
-plt.xlim(-10.0,15.0)
+plt.xlim(-10.0,10.0)
 plt.xlabel (r'Distance to water slab surface / $\AA$', fontsize=64)
 
 
