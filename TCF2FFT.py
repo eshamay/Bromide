@@ -1,6 +1,7 @@
 import numpy, sys, operator, PlotUtility, scipy.signal, Smoothing
 from ColumnDataFile import ColumnDataFile as CDF
 import matplotlib.pyplot as plt
+import Smoothing
 
 ### Some constants for the calculations ###
 # speed of light in cm/s
@@ -46,12 +47,15 @@ def timeAxis(x):
 
 # load the column-data file
 cdf = CDF (sys.argv[1])
+tcf = cdf[0]
+
+# do the fft here
 
 #########********** Do the time-domain work here - calculate the ACF/TCFs **********############
 #########                                                                           ############
 # best convolve method = WK_acorr w/o ensemble avg and taking the 'full' without returning half the tcf
-acorr = [WK_autocorr(cdf[i]) for i in range(len(cdf))]	# use numpy's autocorrelation function via fft in the WK theorem
-tcf = acorr
+#acorr = [WK_autocorr(cdf[i]) for i in range(len(cdf))]	# use numpy's autocorrelation function via fft in the WK theorem
+#tcf = acorr
 #tcf = [simpleTCF(cdf[i]) for i in range(len(cdf))]	# just multiply evevrything by the first value
 #tcf = [ensembleAverage(i) for i in acorr]	# finish the autocorr with ensemble averaging
 
@@ -84,7 +88,7 @@ def prefactorFFT(x,freq):
 
 def freqAxis():
 	#return [float(i)/len(x)/dt/c/2.0 for i in range(len(x))]		# old way
-	axis = numpy.array(numpy.fft.fftfreq(n=len(tcf[0]), d=dt))/c
+	axis = numpy.array(numpy.fft.fftfreq(n=len(tcf), d=dt))/c
 	return axis
 
 #########********** Do the frequency-domain work here - calculate the FFT of the TCFs **********############
@@ -100,23 +104,23 @@ axs.set_xlabel(r'Frequency / cm$^{-1}$', size='xx-large')
 freq_axis = freqAxis()
 
 #window_fft = [windowFFT(tcf[x], numpy.hamming) for x in range(len(tcf))]
-#fft = [fft(tcf[x]) for x in range(len(tcf))]
+fft = squareFFT(fft(tcf))
 #window_fft = [prefactorFFT(x,freq_axis) for x in window_fft]
 #fft = [prefactorFFT(x,freq_axis) for x in fft]
 
 # plots out the spectrum (or power spectrum if using abs(x)**2)
 #map (lambda x: axs.plot (freq_axis, numpy.abs(x)), fft)
 #test_tcf = map (lambda x,y,z: numpy.sqrt(x**2+y**2+z**2), tcf[0], tcf[1], tcf[2])
-avg_fft = [numpy.abs(prefactorFFT(fft(x), freq_axis))**2 for x in tcf]
-avg_fft = reduce (operator.add, avg_fft)
-print len(avg_fft)
+#avg_fft = [numpy.abs(prefactorFFT(fft(x), freq_axis))**2 for x in tcf]
+#avg_fft = reduce (operator.add, avg_fft)
+#print len(avg_fft)
 
-axs.plot(freq_axis, avg_fft, color='k', linewidth=0.3, label="Power Spectrum")
+#axs.plot(freq_axis, avg_fft, color='k', linewidth=0.3, label="Power Spectrum")
 #hamming = numpy.abs(prefactorFFT(windowFFT(test_tcf,numpy.hamming),freq_axis))
 #axs.plot(freq_axis, hamming, linewidth=1.0, color='r', label="Hamming")
 
-#smooth_hamming = Smoothing.window_smooth(hamming,window_len=10)
-#axs.plot(freq_axis, smooth_hamming, linewidth=2.0, color='k', label="Smooth Hamming")
+smooth_gaussian = Smoothing.window_smooth(numpy.array(fft),window_len=10,window='hanning')
+axs.plot(freq_axis, smooth_gaussian, linewidth=2.0, color='k', label="Smooth Hamming")
 #axs.plot(freq_axis, numpy.abs(windowFFT(test_tcf))
 #plt.xlim(1000,4000)
 

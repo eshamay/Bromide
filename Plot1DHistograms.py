@@ -2,6 +2,7 @@ import sys
 import glob
 from ColumnDataFile import ColumnDataFile as CDF
 from scipy import interpolate
+from scipy import signal
 import matplotlib.pyplot as plt
 from pylab import *
 import numpy
@@ -58,6 +59,8 @@ def smooth(x,window_len=11,window='hanning'):
 	#print(len(s))
 	if window == 'flat': #moving average
 		w=numpy.ones(window_len,'d')
+  if window == 'gaussian':
+    w=scipy.signal.gaussian(window_len,5.0)
 	else:
 		w=eval('numpy.'+window+'(window_len)')
 
@@ -99,12 +102,13 @@ xticks(fontsize=48)
 
 yticks([])
 
-
+'''
 name = cdfs[0].filename
 if "theta" in name or "oh" in name:
 	plt.xlabel (r'$\cos(\theta)$', fontsize=64)
 elif "phi" in name:
 	plt.xlabel (r'$\cos(\phi)$', fontsize=64)
+'''
 
 
 '''
@@ -126,6 +130,5 @@ numpy.savetxt(sys.argv[1]+".1d.txt", (xi,ynew), fmt="%12.6e")
 #import csv
 #writer = csv.writer(open(sys.argv[1]+".1d.txt", "wb"),delimiter=' ')
 #writer.writerows(zip(xi,ynew))
-
 
 plt.show()
