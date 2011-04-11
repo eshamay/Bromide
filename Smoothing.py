@@ -44,7 +44,7 @@ def window_smooth(x,window_len=11,window='hanning'):
 
 
 	if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman', 'gaussian']:
-		raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+		raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman', 'gaussian'"
 
 
 	s=numpy.r_[2*x[0]-x[window_len-1::-1],x,2*x[-1]-x[-1:-window_len:-1]]
