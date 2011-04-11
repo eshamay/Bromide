@@ -119,8 +119,10 @@ fft = squareFFT(fft(tcf))
 #hamming = numpy.abs(prefactorFFT(windowFFT(test_tcf,numpy.hamming),freq_axis))
 #axs.plot(freq_axis, hamming, linewidth=1.0, color='r', label="Hamming")
 
-smooth_gaussian = Smoothing.window_smooth(numpy.array(fft),window_len=10,window='hanning')
-axs.plot(freq_axis, smooth_gaussian, linewidth=2.0, color='k', label="Smooth Hamming")
+smooth_gaussian = Smoothing.window_smooth(numpy.array(fft),window_len=20,window='gaussian')
+axs.plot(freq_axis, fft, linewidth=2.0, color='r', label="Raw")
+axs.plot(freq_axis, smooth_gaussian, linewidth=2.0, color='k', label="Smooth")
+axs.set_xlim(1000,4000)
 #axs.plot(freq_axis, numpy.abs(windowFFT(test_tcf))
 #plt.xlim(1000,4000)
 
