@@ -11,7 +11,7 @@ k = 1.3806504e-23
 hbar = 1.05457148e-34
 # timestep of the simulation
 #dt = 0.75e-15
-dt = 0.75e-15
+dt = 1.0e-15
 T = 250.0	# in kelvin
 Beta = 1/(k*T)
 
@@ -107,7 +107,7 @@ def freqAxis():
 # load the column-data file
 cdf = CDF (sys.argv[1])
 dipoles = [numpy.array([cdf[0][i], cdf[1][i], cdf[2][i]]) for i in range(len(cdf[0]))]
-tcf = [vectorAutocorr(dipoles,tau) for tau in range(3500)]
+tcf = [vectorAutocorr(dipoles,tau) for tau in range(7000)]
 
 # plot the tcf
 fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
@@ -117,9 +117,7 @@ axs.set_xlabel(r'Timestep', size='xx-large')
 axs.plot (range(len(tcf)), tcf)
 
 
-# apply a windowing function
 tcf = [t * hwin for t,hwin in zip(tcf,numpy.hanning(len(tcf)))]
-
 
 #########********** Do the frequency-domain work here - calculate the FFT of the TCFs **********############
 #########                                                                                       ############
@@ -133,19 +131,17 @@ axs.set_xlabel(r'Frequency / cm$^{-1}$', size='xx-large')
 # use the same axis for all the spectra
 freq_axis = numpy.array(numpy.fft.fftfreq(n=len(tcf), d=dt))/c
 #freq_axis = freq_axis[:len(freq_axis)/2+1]
-print len(freq_axis)
 
-#fft_tcf = fft(tcf)
-#fft_tcf = alpha_fft(tcf,dt)
 fft_tcf = numpy.fft.fft(tcf)
-print len(fft_tcf)
 #fft_tcf = fft_tcf[len(fft_tcf)/2:]
 #fft_tcf = [abs(f)*abs(f) for f in fft_tcf]
-fft_tcf = [w*w*abs(f)*abs(f) for w,f in zip(freq_axis,fft_tcf)]
-
+fft_tcf = numpy.array([w*w*abs(f)*abs(f) for w,f in zip(freq_axis,fft_tcf)])
 axs.plot(freq_axis, fft_tcf, linewidth=2.0, color='r')
-plt.xlim(1000,4000)
 
+fft_smooth = Smoothing.window_smooth(fft_tcf,window_len=10,window='gaussian')
+axs.plot(freq_axis, fft_smooth, linewidth=2.0, color='b')
+
+plt.xlim(0,6000)
 #PlotUtility.ShowLegend(axs)
 plt.show()
 
