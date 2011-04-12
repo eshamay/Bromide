@@ -1,5 +1,5 @@
 import numpy
-import scipy.signal.gaussian
+import scipy.signal
 
 def window_smooth(x,window_len=11,window='hanning'):
 	"""smooth the data using a window with requested size.
@@ -43,16 +43,16 @@ def window_smooth(x,window_len=11,window='hanning'):
 		return x
 
 
-	if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-		raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'"
+	if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman', 'gaussian']:
+		raise ValueError, "Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman', 'gaussian'"
 
 
 	s=numpy.r_[2*x[0]-x[window_len-1::-1],x,2*x[-1]-x[-1:-window_len:-1]]
 	#print(len(s))
 	if window == 'flat': #moving average
 		w=numpy.ones(window_len,'d')
-  elif window == 'gaussian':
-    w=scipy.signal.gaussian(window_len,window_len/4)
+	elif window == 'gaussian':
+		w=scipy.signal.gaussian(window_len,window_len/5.0)
 	else:
 		w=eval('numpy.'+window+'(window_len)')
 
