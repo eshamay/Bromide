@@ -11,7 +11,7 @@ k = 1.3806504e-23
 hbar = 1.05457148e-34
 # timestep of the simulation
 #dt = 0.75e-15
-dt = 0.75e-15
+dt = 1.0e-15
 T = 300.0	# in kelvin
 Beta = 1/(k*T)
 
