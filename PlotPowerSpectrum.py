@@ -76,11 +76,11 @@ fft_tcfs_y = [FFT(t[:len(t)/2]) for t in tcfs_y]
 fft_tcfs_z = [FFT(t[:len(t)/2]) for t in tcfs_z]
 fft_tcfs = [(x+y+z)/3.0 for x,y,z in zip(fft_tcfs_x,fft_tcfs_y,fft_tcfs_z)]
 avg_fft = reduce(operator.add, fft_tcfs)/len(fft_tcfs)
-smooth = Smoothing.window_smooth(avg_fft)
+#smooth = Smoothing.window_smooth(avg_fft)
 
 #for f in fft_tcfs:
 	#axs.plot(freq_axis, f, linewidth=2.0)
-axs.plot(freq_axis, smooth, linewidth=4.0, linestyle='-', color='k')
+axs.plot(freq_axis, avg_fft, linewidth=4.0, linestyle='-', color='k')
 
 plt.xlim(0,6000)
 #PlotUtility.ShowLegend(axs)
