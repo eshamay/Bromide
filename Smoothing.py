@@ -52,7 +52,7 @@ def window_smooth(x,window_len=11,window='hanning'):
 	if window == 'flat': #moving average
 		w=numpy.ones(window_len,'d')
 	elif window == 'gaussian':
-		w=scipy.signal.gaussian(window_len,window_len/2.0)
+		w=scipy.signal.gaussian(window_len,10.0)
 	else:
 		w=eval('numpy.'+window+'(window_len)')
 
