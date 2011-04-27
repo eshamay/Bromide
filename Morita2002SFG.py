@@ -9,17 +9,53 @@
 # PlotData creates 2 figures, one for IR and one for SFG. The SFG figure has 3 axes for X,Y, and Z polarization choices for dipole vector component
 
 import sys
-from ColumnDataFile import ColumnDataFile
-from DipPolAnalyzer import DipPolAnalyzer
-from TCFSFGAnalyzer import TCFSFGAnalyzer
-
-#from PlotUtility import *
+from DipPolAnalyzer import DipolePolarizabilityFile as DPF
+from PlotPowerSpectra import *
 
 #import matplotlib.pyplot as plt
 # the extents of the x-range
 xmin = 1000.0
 xmax = 5000.0
+c = 29979245800.0		# speed of light (cm/s)
+dt = 0.75e-15	# length of time between each simulation data point
+correlation_tau = 7000	# length of the correlation function
 
+# load the data file
+dpf = DPF(sys.argv[1])
+alpha = dpf.Alpha(0,0)
+mu = dpf.Mu(2)
+
+# perform the cross correlation of the polarizability with the dipole in the SSP regime
+ccf = [ManualCorrelate(operator.mul, tau, alpha, mu) for tau in range(correlation_tau)]
+
+# set up the time axis and plot the correlation function
+axs = TCFAxis()
+axs.plot(range(len(ccf)), ccf, linewidth=2.5, color='k')
+
+# apply a smoothing window to the ccf
+window = numpy.hanning(len(ccf))
+ccf = window * ccf
+
+# fourier transform the smoothed/periodic correlation function
+fft = numpy.array(numpy.fft.fft(ccf))	 # this is a complex-valued function
+
+# define the frequency axis
+freqs = numpy.array(numpy.fft.fftfreq(n=len(ccf), d=dt))/c
+
+# apply a prefactor
+fft = fft * freqs
+
+# now take the mag squared of the function to get the SFG lineshape
+chi_2 = abs(fft) * abs(fft)
+
+# set up the frequency axis/figure
+axs = PowerSpectrumAxis()
+print len(freqs)
+print len(chi_2)
+axs.plot (freqs, chi_2, linewidth=2.5, color='k')
+
+plt.xlim(0,5000)
+plt.show()
 
 class MoritaSFG2002:
 
@@ -111,8 +147,8 @@ class MoritaSFG2002:
 '''
 
 
-sfg = MoritaSFG2002(sys.argv[1], 1.0e-15, 300.0)
+#sfg = MoritaSFG2002(sys.argv[1], 1.0e-15, 300.0)
 
-sfg.PrintData()
+#sfg.PrintData()
 #sfg.PlotData()
 #plt.show()

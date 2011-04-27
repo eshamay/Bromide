@@ -28,9 +28,8 @@ class DipolePolarizabilityFile:
 		al = [a[i,j] for a in self.alpha]
 		return al
 
-dpf = DipolePolarizabilityFile(sys.argv[1])
-		
-	
+
+
 
 class DipPolAnalyzer:
 	def __init__(self,rho,alpha=None):
