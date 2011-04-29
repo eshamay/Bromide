@@ -18,7 +18,7 @@ xmin = 1000.0
 xmax = 5000.0
 c = 29979245800.0		# speed of light (cm/s)
 dt = 0.75e-15	# length of time between each simulation data point
-correlation_tau = 6000	# length of the correlation function
+correlation_tau = 7000	# length of the correlation function
 
 # load the data file
 dpf = DPF(sys.argv[1])

@@ -54,7 +54,7 @@ def ManualCorrelate(func,tau,x,y=None):
 			d = d + func(x[n], x[Ncorr+n])	# Autocorrelation
 		else:
 			d = d + func(x[n], y[Ncorr+n])	# Cross correlation
-	return numpy.array(d)/float(Nav)
+	return numpy.array(d)/float(Nav)		# ensemble averaging
 
 def vectorAutocorr(x,tau):
 	ManualAutocorr(numpy.dot,x,tau)
