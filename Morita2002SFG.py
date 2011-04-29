@@ -18,7 +18,7 @@ xmin = 1000.0
 xmax = 5000.0
 c = 29979245800.0		# speed of light (cm/s)
 dt = 0.75e-15	# length of time between each simulation data point
-correlation_tau = 7000	# length of the correlation function
+correlation_tau = 6000	# length of the correlation function
 
 # load the data file
 dpf = DPF(sys.argv[1])
@@ -26,7 +26,7 @@ alpha = dpf.Alpha(0,0)
 mu = dpf.Mu(2)
 
 # perform the cross correlation of the polarizability with the dipole in the SSP regime
-ccf = [ManualCorrelate(operator.mul, tau, alpha, mu) for tau in range(correlation_tau)]
+ccf = numpy.array([ManualCorrelate(operator.mul, tau, alpha, mu) for tau in range(correlation_tau)])
 
 # set up the time axis and plot the correlation function
 axs = TCFAxis()
@@ -50,12 +50,12 @@ chi_2 = abs(fft) * abs(fft)
 
 # set up the frequency axis/figure
 axs = PowerSpectrumAxis()
-print len(freqs)
-print len(chi_2)
 axs.plot (freqs, chi_2, linewidth=2.5, color='k')
 
 plt.xlim(0,5000)
 plt.show()
+
+
 
 class MoritaSFG2002:
 
