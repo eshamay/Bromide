@@ -12,6 +12,7 @@ import sys
 from DipPolAnalyzer import DipolePolarizabilityFile as DPF
 from PlotPowerSpectra import *
 import Smoothing
+import operator
 
 #import matplotlib.pyplot as plt
 # the extents of the x-range
@@ -21,28 +22,35 @@ c = 29979245800.0		# speed of light (cm/s)
 dt = 0.75e-15	# length of time between each simulation data point
 correlation_tau = 7000	# length of the correlation function
 
+files = glob.glob('*/sfg.cold.dat')
+dpfs = [DPF(f) for f in files]
+
 # load the data file
-dpf = DPF(sys.argv[1])
-alpha = dpf.Alpha(0,0)
-mu = dpf.Mu(2)
+#dpf = DPF(sys.argv[1])
+alphas_xx = [dpf.Alpha(0,0) for dpf in dpfs]
+alphas_yy = [dpf.Alpha(1,1) for dpf in dpfs]
+mus = [dpf.Mu(2) for dpf in dpfs]
 
 # perform the cross correlation of the polarizability with the dipole in the SSP regime
 #ccf = numpy.array([ManualCorrelate(operator.mul, tau, alpha, mu) for tau in range(correlation_tau)])
-ccf = numpy.array(NewCorr(alpha,mu)[:correlation_tau])
+ccfs_xx = [numpy.array(NewCorr(alpha,mu)[:correlation_tau]) for alpha,mu in zip(alphas_xx,mus)]	 # using the new routine
+ccfs_yy = [numpy.array(NewCorr(alpha,mu)[:correlation_tau]) for alpha,mu in zip(alphas_yy,mus)]	 # using the new routine
+ccfs = ccfs_xx + ccfs_yy
+avg_ccf = numpy.array(reduce(operator.add,ccfs))/2.0/len(ccfs)
 
 # set up the time axis and plot the correlation function
 axs = TCFAxis()
-axs.plot(range(len(ccf)), ccf, linewidth=2.5, color='k')
+axs.plot(range(len(avg_ccf)), avg_ccf, linewidth=2.5, color='k')
 
 # apply a smoothing window to the ccf
-window = numpy.hanning(len(ccf))
-ccf = window * ccf
+window = numpy.hanning(len(avg_ccf))
+avg_ccf = window * avg_ccf
 
 # fourier transform the smoothed/periodic correlation function
-fft = numpy.array(numpy.fft.fft(ccf))	 # this is a complex-valued function
+fft = numpy.array(numpy.fft.fft(avg_ccf))	 # this is a complex-valued function
 
 # define the frequency axis
-freqs = numpy.array(numpy.fft.fftfreq(n=len(ccf), d=dt))/c
+freqs = numpy.array(numpy.fft.fftfreq(n=len(avg_ccf), d=dt))/c
 
 # apply a prefactor
 fft = fft * freqs
@@ -51,7 +59,7 @@ fft = fft * freqs
 chi_2 = abs(fft) * abs(fft)
 
 # smooth out the chi_2
-smooth_chi_2 = Smoothing.window_smooth(chi_2, window_len=5)
+smooth_chi_2 = Smoothing.window_smooth(chi_2, window_len=10)
 
 # set up the frequency axis/figure
 axs = PowerSpectrumAxis()
