@@ -42,6 +42,18 @@ def FFT(tcf):
   freqs = FreqAxis(len(tcf),dt)
   return numpy.array(freqs*freqs*abs(fft)*abs(fft))
 
+def NewCorr(x,y=None):
+	ret = []
+	if y == None:	# the autocorrelation case
+		ret = numpy.array(numpy.correlate(x,x,"full"))[::-1]	# reverse the list with [::-1]
+	else:	# cross-correlate x and y
+		ret = numpy.array(numpy.correlate(x,y,"full"))[::-1]
+
+	ret = ret[len(ret)/2:]	# only take the 1st half of the result (2nd half is just reversed)
+	ret = [n / (len(ret)-tau) for n,tau in zip(ret,range(len(ret)))]	# do the ensemble average over the time lags
+	return ret
+
+	''' The original brute-force method -- pretty slow '''
 def ManualCorrelate(func,tau,x,y=None):
 	Nstep = float(len(x))
 	Ncorr = tau
@@ -55,6 +67,7 @@ def ManualCorrelate(func,tau,x,y=None):
 		else:
 			d = d + func(x[n], y[Ncorr+n])	# Cross correlation
 	return numpy.array(d)/float(Nav)		# ensemble averaging
+
 
 def vectorAutocorr(x,tau):
 	ManualAutocorr(numpy.dot,x,tau)

@@ -11,6 +11,7 @@
 import sys
 from DipPolAnalyzer import DipolePolarizabilityFile as DPF
 from PlotPowerSpectra import *
+import Smoothing
 
 #import matplotlib.pyplot as plt
 # the extents of the x-range
@@ -26,7 +27,8 @@ alpha = dpf.Alpha(0,0)
 mu = dpf.Mu(2)
 
 # perform the cross correlation of the polarizability with the dipole in the SSP regime
-ccf = numpy.array([ManualCorrelate(operator.mul, tau, alpha, mu) for tau in range(correlation_tau)])
+#ccf = numpy.array([ManualCorrelate(operator.mul, tau, alpha, mu) for tau in range(correlation_tau)])
+ccf = numpy.array(NewCorr(alpha,mu)[:correlation_tau])
 
 # set up the time axis and plot the correlation function
 axs = TCFAxis()
@@ -48,9 +50,12 @@ fft = fft * freqs
 # now take the mag squared of the function to get the SFG lineshape
 chi_2 = abs(fft) * abs(fft)
 
+# smooth out the chi_2
+smooth_chi_2 = Smoothing.window_smooth(chi_2, window_len=5)
+
 # set up the frequency axis/figure
 axs = PowerSpectrumAxis()
-axs.plot (freqs, chi_2, linewidth=2.5, color='k')
+axs.plot (freqs, smooth_chi_2, linewidth=2.5, color='k')
 
 plt.xlim(0,5000)
 plt.show()
