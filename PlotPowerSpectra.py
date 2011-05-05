@@ -105,7 +105,8 @@ def ParseColumnFileData(cdfs,cols):
 def PowerSpectrumAxis():
 	# Set up the figure for the spectral plots
 	fig = plt.figure(num=None, facecolor='w', edgecolor='w', frameon=True)
-	axs = fig.add_subplot(1,1,1)
+	#axs = fig.add_subplot(1,1,1, autoscaleon=False)
+	axs = plt.subplot(1,1,1)
 	axs.set_ylabel(r'Spectrum', size='xx-large')
 	axs.set_xlabel(r'Frequency / cm$^{-1}$', size='xx-large')
 	return axs
