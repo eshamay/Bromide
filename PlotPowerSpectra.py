@@ -75,9 +75,9 @@ def vectorAutocorr(x,tau):
 def ScalarAutocorr(x,tau):
 	ManualAutocorr(operator.mul, tau, x)
 
-def TCFAxis():
+def TCFAxis(fig_num=1):
 	# plot the tcf
-	fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
+	fig = plt.figure(num=fig_num, facecolor='w', edgecolor='w', frameon=True)
 	axs = fig.add_subplot(1,1,1)
 	axs.set_ylabel(r'ACF', size='xx-large')
 	axs.set_xlabel(r'Timestep', size='xx-large')
