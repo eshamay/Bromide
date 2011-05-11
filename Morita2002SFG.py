@@ -9,16 +9,80 @@
 # PlotData creates 2 figures, one for IR and one for SFG. The SFG figure has 3 axes for X,Y, and Z polarization choices for dipole vector component
 
 import sys
-from ColumnDataFile import ColumnDataFile
-from DipPolAnalyzer import DipPolAnalyzer
-from TCFSFGAnalyzer import TCFSFGAnalyzer
-
-#from PlotUtility import *
+from DipPolAnalyzer import DipolePolarizabilityFile as DPF
+from PlotPowerSpectra import *
+import PlotUtility
+import Smoothing
+import operator
 
 #import matplotlib.pyplot as plt
 # the extents of the x-range
 xmin = 1000.0
 xmax = 5000.0
+c = 29979245800.0		# speed of light (cm/s)
+dt = 0.75e-15	# length of time between each simulation data point
+correlation_tau = 7000	# length of the correlation function
+
+
+def PlotFiles (files, axs, lbl):
+	dpfs = [DPF(f) for f in files]
+	
+	# load the data file
+	#dpf = DPF(sys.argv[1])
+	alphas_xx = [dpf.Alpha(0,0) for dpf in dpfs]
+	alphas_yy = [dpf.Alpha(1,1) for dpf in dpfs]
+	mus = [dpf.Mu(2) for dpf in dpfs]
+	
+	# perform the cross correlation of the polarizability with the dipole in the SSP regime
+	#ccf = numpy.array([ManualCorrelate(operator.mul, tau, alpha, mu) for tau in range(correlation_tau)])
+	ccfs_xx = [numpy.array(NewCorr(alpha,mu)[:correlation_tau]) for alpha,mu in zip(alphas_xx,mus)]	 # using the new routine
+	ccfs_yy = [numpy.array(NewCorr(alpha,mu)[:correlation_tau]) for alpha,mu in zip(alphas_yy,mus)]	 # using the new routine
+	ccfs = ccfs_xx + ccfs_yy
+	avg_ccf = numpy.array(reduce(operator.add,ccfs))/2.0/len(ccfs)
+	
+	# set up the time axis and plot the correlation function
+	#axs = TCFAxis()
+	#axs.plot(range(len(avg_ccf)), avg_ccf, linewidth=2.5, color='k')
+	
+	# apply a smoothing window to the ccf
+	window = numpy.hanning(len(avg_ccf))
+	avg_ccf = window * avg_ccf
+	
+	# fourier transform the smoothed/periodic correlation function
+	fft = numpy.array(numpy.fft.fft(avg_ccf))	 # this is a complex-valued function
+	
+	# define the frequency axis
+	freqs = numpy.array(numpy.fft.fftfreq(n=len(avg_ccf), d=dt))/c
+	
+	# apply a prefactor
+	fft = fft * freqs
+	
+	# now take the mag squared of the function to get the SFG lineshape
+	chi_2 = abs(fft) * abs(fft)
+	
+	# smooth out the chi_2
+	dw = freqs[1] - freqs[0]
+	wlen = int(10.0 / dw)
+	print "dw = ", dw
+	print "wlen = ", wlen
+	smooth_chi_2 = Smoothing.window_smooth(chi_2, window_len=wlen)
+
+	axs.plot (freqs, smooth_chi_2, linewidth=2.5, label=lbl)
+	
+
+files_cold = glob.glob('[1-5]/sfg.dat')
+files_hot = glob.glob('[6-9]/sfg.dat')
+files_hot = files_hot + glob.glob('10/sfg.dat')
+
+# set up the frequency axis/figure and plot
+axs = PowerSpectrumAxis()
+PlotFiles (files_cold, axs, 'cold')
+PlotFiles (files_hot, axs, 'hot')
+
+plt.xlim(2500,4500)
+PlotUtility.ShowLegend(axs)
+plt.show()
+
 
 
 class MoritaSFG2002:
@@ -111,8 +175,8 @@ class MoritaSFG2002:
 '''
 
 
-sfg = MoritaSFG2002(sys.argv[1], 1.0e-15, 300.0)
+#sfg = MoritaSFG2002(sys.argv[1], 1.0e-15, 300.0)
 
-sfg.PrintData()
+#sfg.PrintData()
 #sfg.PlotData()
 #plt.show()

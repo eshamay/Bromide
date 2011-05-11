@@ -8,4 +8,3 @@ def SearchDirectoryTree(srcpath, pattern):
 			yield os.path.join(root, filename)
 
 group = lambda t, n: zip(*[t[i::n] for i in range(n)])
-
