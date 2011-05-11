@@ -14,7 +14,7 @@ def ShowLegend(ax):
 
 	# matplotlib.text.Text instances
 	for t in leg.get_texts():
-		t.set_fontsize('x-large')    # the legend text fontsize
+		t.set_fontsize('36')    # the legend text fontsize
 
 	# matplotlib.lines.Line2D instances
 	for l in leg.get_lines():
