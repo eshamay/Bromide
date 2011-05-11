@@ -1,88 +1,61 @@
-import numpy, sys, operator, PlotUtility, scipy.signal, Smoothing
+#!/usr/bin/python
+
+# This SFG calculator creates both IR and SFG spectra from dipole/polarizability files
+# The SFG spectra are all SSP polarized, but that can be changed in the DipPol analyzer
+
+# PrintData prints out 5 columns for frequency and spectral intensity:
+#		frequency, IR, SFG_X, SFG_Y, SFG_Z
+
+# PlotData creates 2 figures, one for IR and one for SFG. The SFG figure has 3 axes for X,Y, and Z polarization choices for dipole vector component
+
+import sys
 from ColumnDataFile import ColumnDataFile as CDF
-import matplotlib.pyplot as plt
+from PlotPowerSpectra import *
 import Smoothing
-import AutoCorrelation
-from glob import glob
 import operator
+import numpy
 
-### Some constants for the calculations ###
-# speed of light in cm/s
-c = 29979245800.0 
-# planck's
-k = 1.3806504e-23
-hbar = 1.05457148e-34
-# timestep of the simulation
-#dt = 0.75e-15
-dt = 0.75e-15
-T = 300.0	# in kelvin
-Beta = 1/(k*T)
+#import matplotlib.pyplot as plt
+# the extents of the x-range
+xmin = 1000.0
+xmax = 5000.0
+c = 29979245800.0		# speed of light (cm/s)
+dt = 0.75e-15	# length of time between each simulation data point
+correlation_tau = 3000
 
-#########********** Do the time-domain work here - calculate the ACF/TCFs **********############
-#########                                                                           ############
+files = sys.argv[1:]
+cdfs = [CDF(f) for f in files]
 
-def AutoCorr1d(x):
-  return AutoCorrelation.fftCyclicAutocorrelation1D(x)
+tcfs_x = [NewCorr(cdf[0])[:correlation_tau] for cdf in cdfs]
+tcfs_y = [NewCorr(cdf[1])[:correlation_tau] for cdf in cdfs]
+tcfs_z = [NewCorr(cdf[2])[:correlation_tau] for cdf in cdfs]
+tcfs = tcfs_x + tcfs_y + tcfs_z
+print len(tcfs)
 
-def FreqAxis(x,dt):
-  return numpy.array(numpy.fft.fftfreq(n=len(x), d=dt))/c
+# set up the time axis and plot the correlation function
+axs = TCFAxis()
+for t in tcfs:
+	axs.plot(range(len(t)), t, linewidth=2.5)
 
-def FFT(x):
-  x = numpy.array(x)
-  N = len(x)
-  window = numpy.hanning(N)
-  x = x*window
-  fft = numpy.fft.fft(x)
-  freqs = FreqAxis(x,dt)
-  return freqs*freqs*abs(fft)*abs(fft)
+# apply a smoothing window to the tcf
+smoothed_tcfs = [numpy.hanning(len(t)) * t for t in tcfs]
 
-# load the column-data file
-cdfs = [CDF(i) for i in sys.argv[1:]]
-data_x = [i[0] for i in cdfs]   # grab the z-component
-data_y = [i[1] for i in cdfs]   # grab the z-component
-data_z = [i[2] for i in cdfs]   # grab the z-component
-tcfs_x = [numpy.array(AutoCorr1d(d)) for d in data_x]
-tcfs_y = [numpy.array(AutoCorr1d(d)) for d in data_y]
-tcfs_z = [numpy.array(AutoCorr1d(d)) for d in data_z]
+# fourier transform the smoothed/periodic correlation function
+ffts = [numpy.array(numpy.fft.fft(t)) for t in smoothed_tcfs]	 # this is a complex-valued function
 
-tcfs = [(x+y+z)/3.0 for x,y,z in zip(tcfs_x,tcfs_y,tcfs_z)]
-avg_tcf = reduce(operator.add, tcfs)
-avg_tcf = avg_tcf[:len(avg_tcf)/2]
+# define the frequency axis
+freqs = [numpy.array(numpy.fft.fftfreq(n=len(t), d=dt))/c for t in smoothed_tcfs]
 
-# plot the tcf
-fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
-axs = fig.add_subplot(1,1,1)
-axs.set_ylabel(r'ACF', size='xx-large')
-axs.set_xlabel(r'Timestep', size='xx-large')
+# apply a prefactor (multiply by the frequency)
+ffts = [f*w for f,w in zip(ffts,freqs)]
 
-#for t in tcfs:
-	#axs.plot(range(len(t)), t)
-axs.plot(range(len(avg_tcf)), avg_tcf, linewidth=3.0, color='k')
+# now take the mag squared of the function to get the SFG lineshape
+lineshapes = [abs(f)*abs(f) for f in ffts]
 
-#########********** Do the frequency-domain work here - calculate the FFT of the TCFs **********############
-#########                                                                                       ############
+# set up the frequency axis/figure
+axs = PowerSpectrumAxis()
+for f,i in zip(freqs,lineshapes):
+	axs.plot (f, i, linewidth=2.5)
 
-# Set up the figure for the spectral plots
-fig = plt.figure(num=None, facecolor='w', edgecolor='w', frameon=True)
-axs = fig.add_subplot(1,1,1)
-axs.set_ylabel(r'Spectrum', size='xx-large')
-axs.set_xlabel(r'Frequency / cm$^{-1}$', size='xx-large')
-
-# use the same axis for all the spectra
-freq_axis = FreqAxis(tcfs[0][:len(tcfs[0])/2],dt)
-
-fft_tcfs_x = [FFT(t[:len(t)/2]) for t in tcfs_x]
-fft_tcfs_y = [FFT(t[:len(t)/2]) for t in tcfs_y]
-fft_tcfs_z = [FFT(t[:len(t)/2]) for t in tcfs_z]
-fft_tcfs = [(x+y+z)/3.0 for x,y,z in zip(fft_tcfs_x,fft_tcfs_y,fft_tcfs_z)]
-avg_fft = reduce(operator.add, fft_tcfs)/len(fft_tcfs)
-smooth = Smoothing.window_smooth(avg_fft)
-
-#for f in fft_tcfs:
-	#axs.plot(freq_axis, f, linewidth=2.0)
-axs.plot(freq_axis, smooth, linewidth=4.0, linestyle='-', color='k')
-
-plt.xlim(0,6000)
-#PlotUtility.ShowLegend(axs)
+plt.xlim(0,5000)
 plt.show()
-
