@@ -64,20 +64,25 @@ def PlotFiles (files, axs, lbl):
 	dw = freqs[1] - freqs[0]
 	wlen = int(10.0 / dw)
 	print "dw = ", dw
-	print "wlen = ", wlen
+	print "wlen = ", 5
 	smooth_chi_2 = Smoothing.window_smooth(chi_2, window_len=wlen)
 
 	axs.plot (freqs, smooth_chi_2, linewidth=2.5, label=lbl)
 	
 
+files = glob.glob('sfg.dat')
 files_cold = glob.glob('[1-5]/sfg.dat')
-files_hot = glob.glob('[6-9]/sfg.dat')
-files_hot = files_hot + glob.glob('10/sfg.dat')
+local = glob.glob('[1-5]/sfg.localfield.dat')
+local2 = glob.glob('[1-5]/sfg.localfield2.dat')
+#files_hot = glob.glob('[6-9]/sfg.dat')
+#files_hot = files_hot + glob.glob('10/sfg.dat')
 
 # set up the frequency axis/figure and plot
 axs = PowerSpectrumAxis()
-PlotFiles (files_cold, axs, 'cold')
-PlotFiles (files_hot, axs, 'hot')
+#PlotFiles (files, axs, 'test')
+PlotFiles (local, axs, 'local')
+PlotFiles (local2, axs, 'local2')
+#PlotFiles (files_hot, axs, 'hot')
 
 plt.xlim(2500,4500)
 PlotUtility.ShowLegend(axs)

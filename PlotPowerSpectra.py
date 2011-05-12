@@ -54,19 +54,14 @@ def NewCorr(x,y=None):
 	return ret
 
 	''' The original brute-force method -- pretty slow '''
-def ManualCorrelate(func,tau,x,y=None):
+def ManualCorrelate(func,tau,mean,x):
 	Nstep = float(len(x))
-	Ncorr = tau
-	Nshift = 1
-	Nav = int((Nstep-Ncorr)/Nshift)
+	Nav = int(Nstep-tau)
 
 	d = 0.0
 	for n in range(Nav):
-		if y == None:
-			d = d + func(x[n], x[Ncorr+n])	# Autocorrelation
-		else:
-			d = d + func(x[n], y[Ncorr+n])	# Cross correlation
-	return numpy.array(d)/float(Nav)		# ensemble averaging
+		d = d + func(x[n]-mean, x[tau+n]-mean)	# Autocorrelation
+	return d/float(Nav)		# ensemble averaging
 
 
 def vectorAutocorr(x,tau):
