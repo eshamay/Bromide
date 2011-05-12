@@ -24,6 +24,8 @@ axs.plot(cdf['position'], O_y, color='k', linestyle=':', linewidth=2.5)
 S_y = array(cdf['S'])*mass['S']/const*10.0
 axs.plot(cdf['position'], S_y, color='r', label=r'SO$_2$ x10', linewidth=3.5)
 
+S_y = array(cdf['S'])*mass['S']/const*10.0
+axs.plot(cdf['position'], S_y, color='r', label=r'SO$_2$ x10', linewidth=3.5)
 
 p0 = array ([0.0, 1.0, 50.0, 3.0])
 fit_func = sm.tanh_fit

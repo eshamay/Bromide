@@ -73,6 +73,7 @@ def autocovariance (x,lag,mean_x,y=None,mean_y=None):
 '''
 
 
+<<<<<<< HEAD
 '''
 def covariance(x,y=None):
   	ret = 0.0
@@ -101,19 +102,26 @@ def covariance(x,y=None):
 ''' The original brute-force method -- pretty slow '''
 '''
 def ManualCorrelate(func,tau,x,y=None):
+=======
+	''' The original brute-force method -- pretty slow '''
+def ManualCorrelate(func,tau,mean,x):
+>>>>>>> e8e27416c9c4723ecf9faf9aab914b5f4043279e
 	Nstep = float(len(x))
-	Ncorr = tau
-	Nshift = 1
-	Nav = int((Nstep-Ncorr)/Nshift)
+	Nav = int(Nstep-tau)
 
 	d = 0.0
 	for n in range(Nav):
+<<<<<<< HEAD
 		if y == None:
 			d = d + func(x[n], x[Ncorr+n])	# Autocorrelation
 		else:
 			d = d + func(x[n], y[Ncorr+n])	# Cross correlation
 	return numpy.array(d)/float(Nav)		# ensemble averaging
 '''
+=======
+		d = d + func(x[n]-mean, x[tau+n]-mean)	# Autocorrelation
+	return d/float(Nav)		# ensemble averaging
+>>>>>>> e8e27416c9c4723ecf9faf9aab914b5f4043279e
 
 
 def TCFAxis(fig_num=1):

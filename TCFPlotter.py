@@ -10,23 +10,18 @@ tau = 20000	# length of the correlation function
 
 class TimeFunction:
 	def __init__(self, data):
-		self.data = data
-		self.tcf = numpy.array(NewCorr(self.data))
-		self.time = numpy.array(range(len(self.data)))/dt*1.0e15	# in fs
-		self.tcftime = numpy.array(range(len(self.tcf)))/dt*1.0e15	# in fs
-		(self.freqs,self.spectrum) = SmoothSpectrum(self.tcf)
+		self.data = numpy.array(data)
+                self.mean = numpy.average(data)
+                self.covariance = (self.data * self.data).sum()
+                self.data = self.data - self.mean
 
-	def Data(self):
-	  	return self.data
+		self.tcf = numpy.array(NewCorr(self.data)[:correlation_tau])/self.covariance
+		#self.time = numpy.array(range(len(self.tcf)))/dt*1.0e15	# in fs
+
+		(self.freqs,self.spectrum) = SmoothSpectrum(self.tcf)
 
 	def TCF(self):
 		return self.tcf
-
-	def Time(self):
-		return self.time
-
-	def TCFTime(self):
-		return self.tcftime
 
 	def Freqs(self):
 		return self.freqs
@@ -40,26 +35,33 @@ def AverageTCF (tcfs):
 	return sum_tcf / len(tcfs)
 	
 
-def PlotFiles(files, axs, cols, labels):
+def PlotFiles(files, axs, cols, lbl):
 	cdfs = [CDF(i) for i in files]
 
-	# each column gets its own time function
-	tfs = [[TimeFunction(cdfs[c][i]) for c in range(len(cdfs))] for i in cols]
+        # each column gets its own time function
+	tfs = [[TimeFunction(c[i]) for c in cdfs] for i in cols]
 
 	# calculate the correlation of each time function
 	tcfs = [[t[i].TCF() for t in tfs] for i in cols]
-
+	
 	# average the correlations
 	avg_tcfs = [AverageTCF(t) for t in tcfs]
+	#avg_tcf = AverageTCF(avg_tcfs)
 
 	# calculate the spectra
+	#a = SmoothSpectrum(avg_tcf)
+	#axs.plot(a[0], a[1], linewidth=3.0)
+
 	spectra = [SmoothSpectrum(t) for t in avg_tcfs]
+	for s in spectra:
+		axs.plot (s[0], s[1], linewidth=1.5)
 
-	for s,l in zip(spectra,labels):
-		axs.plot (s[0], s[1], linewidth=2.5, label=l)
-	#axs.plot (antisym_freqs, antisym_spectrum, linewidth=2.5, label='antisym')
-	#axs.plot (sum_freqs, sum_spectrum, linewidth=2.5, label=lbl)
+filename = 'h2o-bondlengths.normal_modes.dat'
+#filename='so2-bond+angles.dat'
+files_cold = glob.glob('[1-5]/'+filename)
 
+files_hot = glob.glob('[6-9]/'+filename)
+files_hot = files_hot + glob.glob('10/'+filename)
 
 #filename = 'so2-bond+angles.dat'
 filename='h2o-bondlengths.normal_modes.z.dat'
