@@ -28,17 +28,38 @@ def PlotFiles (files, axs, lbl):
 	dpfs = [DPF(f) for f in files]
 	
 	# load the data file
-	#dpf = DPF(sys.argv[1])
 	alphas_xx = [dpf.Alpha(0,0) for dpf in dpfs]
-	alphas_yy = [dpf.Alpha(1,1) for dpf in dpfs]
+	mean_xx = [numpy.average(alpha) for alpha in alphas_xx]
+    	alphas_xx = [alpha / mean for alpha,mean in zip(alphas_xx,mean_xx)]
+	covariance_xx = [(alpha*alpha).sum() for alpha in alphas_xx]
+
+	alphas_yy = [dpf.Alpha(0,0) for dpf in dpfs]
+	mean_yy = [numpy.average(alpha) for alpha in alphas_yy]
+    	alphas_yy = [alpha / mean for alpha,mean in zip(alphas_yy,mean_yy)]
+	covariance_yy = [(alpha*alpha).sum() for alpha in alphas_yy]
+
+	alphas_xy = [dpf.Alpha(0,0) for dpf in dpfs]
+	mean_xy = [numpy.average(alpha) for alpha in alphas_xy]
+    	alphas_xy = [alpha / mean for alpha,mean in zip(alphas_xy,mean_xy)]
+	covariance_xy = [(alpha*alpha).sum() for alpha in alphas_xy]
+
+	alphas_yx = [dpf.Alpha(0,0) for dpf in dpfs]
+	mean_yx = [numpy.average(alpha) for alpha in alphas_yx]
+    	alphas_yx = [alpha / mean for alpha,mean in zip(alphas_yx,mean_yx)]
+	covariance_yx = [(alpha*alpha).sum() for alpha in alphas_yx]
+
 	mus = [dpf.Mu(2) for dpf in dpfs]
+	mu_means = [numpy.average(mu) for mu in mus]
+	mus = [mu/mu_mean for mu,mu_mean in zip(mus,mu_means)]
 	
 	# perform the cross correlation of the polarizability with the dipole in the SSP regime
 	#ccf = numpy.array([ManualCorrelate(operator.mul, tau, alpha, mu) for tau in range(correlation_tau)])
 	ccfs_xx = [numpy.array(NewCorr(alpha,mu)[:correlation_tau]) for alpha,mu in zip(alphas_xx,mus)]	 # using the new routine
 	ccfs_yy = [numpy.array(NewCorr(alpha,mu)[:correlation_tau]) for alpha,mu in zip(alphas_yy,mus)]	 # using the new routine
-	ccfs = ccfs_xx + ccfs_yy
-	avg_ccf = numpy.array(reduce(operator.add,ccfs))/2.0/len(ccfs)
+	ccfs_xy = [numpy.array(NewCorr(alpha,mu)[:correlation_tau]) for alpha,mu in zip(alphas_xy,mus)]	 # using the new routine
+	ccfs_yx = [numpy.array(NewCorr(alpha,mu)[:correlation_tau]) for alpha,mu in zip(alphas_yx,mus)]	 # using the new routine
+	ccfs = ccfs_xx + ccfs_yy + ccfs_xy + ccfs_yx
+	avg_ccf = numpy.array(reduce(operator.add,ccfs))/len(ccfs)
 	
 	# set up the time axis and plot the correlation function
 	#axs = TCFAxis()
@@ -61,28 +82,24 @@ def PlotFiles (files, axs, lbl):
 	chi_2 = abs(fft) * abs(fft)
 	
 	# smooth out the chi_2
-	dw = freqs[1] - freqs[0]
-	wlen = int(10.0 / dw)
-	print "dw = ", dw
-	print "wlen = ", 5
-	smooth_chi_2 = Smoothing.window_smooth(chi_2, window_len=wlen)
+	smooth_chi_2 = Smoothing.window_smooth(chi_2, window_len=10)
 
 	axs.plot (freqs, smooth_chi_2, linewidth=2.5, label=lbl)
 	
 
 files = glob.glob('sfg.dat')
 files_cold = glob.glob('[1-5]/sfg.dat')
-local = glob.glob('[1-5]/sfg.localfield.dat')
-local2 = glob.glob('[1-5]/sfg.localfield2.dat')
-#files_hot = glob.glob('[6-9]/sfg.dat')
-#files_hot = files_hot + glob.glob('10/sfg.dat')
+#local = glob.glob('[1-5]/sfg.localfield.dat')
+#local2 = glob.glob('[1-5]/sfg.localfield2.dat')
+files_hot = glob.glob('[6-9]/sfg.dat')
+files_hot = files_hot + glob.glob('10/sfg.dat')
 
 # set up the frequency axis/figure and plot
 axs = PowerSpectrumAxis()
-#PlotFiles (files, axs, 'test')
-PlotFiles (local, axs, 'local')
-PlotFiles (local2, axs, 'local2')
-#PlotFiles (files_hot, axs, 'hot')
+PlotFiles (files_cold, axs, 'cold')
+PlotFiles (files_hot, axs, 'hot')
+#PlotFiles (local, axs, 'local')
+#PlotFiles (local2, axs, 'local2')
 
 plt.xlim(2500,4500)
 PlotUtility.ShowLegend(axs)
