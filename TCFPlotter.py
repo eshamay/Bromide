@@ -1,31 +1,12 @@
 from PlotPowerSpectra import *
 from ColumnDataFile import ColumnDataFile as CDF
-import sys
-import scipy.stats
+import glob
 
 import matplotlib.pyplot as plt
-import PlotUtility
-from pylab import *
 
 c = 29979245800.0		# speed of light (cm/s)
 dt = 0.75e-15	# length of time between each simulation data point
-correlation_tau = 7000	# length of the correlation function
-
-def WindowFunction(data):
-	return numpy.hanning(len(data))
-
-def SmoothFunction(data):
-	return WindowFunction(data) * data
-
-def SmoothSpectrum(data):
-	smooth_data = SmoothFunction(data)
-	freqs = numpy.array(numpy.fft.fftfreq(n=len(data), d=dt))/c
-	fft = numpy.array(numpy.fft.fft(smooth_data))
-	fft = fft * freqs
-	spectrum = abs(fft) * abs(fft)
-	#smooth_spectrum = Smoothing.window_smooth(spectrum, window_len=5)
-	smooth_spectrum = spectrum
-	return (freqs,smooth_spectrum)
+tau = 20000	# length of the correlation function
 
 class TimeFunction:
 	def __init__(self, data):
@@ -80,35 +61,39 @@ def PlotFiles(files, axs, cols, labels):
 	#axs.plot (sum_freqs, sum_spectrum, linewidth=2.5, label=lbl)
 
 
-#filename='h2o-bondlengths.oh.normal_modes.dat'
-filename='so2-bond+angles.normal_modes.dat'
-#filename='h2o-bondlengths.normal_modes.dat'
-files_cold = glob.glob('[1-5]/'+filename)
+#filename = 'so2-bond+angles.dat'
+filename='h2o-bondlengths.normal_modes.z.dat'
+cold = glob.glob('[1-5]/'+filename)
+hot = glob.glob('[6-9]/'+filename)
+#hot = hot + glob.glob('10/'+filename)
 
-#cdf = CDF(sys.argv[1])
+cdfs_cold = [CDF(f) for f in cold]
+cdfs_hot = [CDF(f) for f in hot]
+tcfs_cold = [Correlate(i[0])[:tau] for i in cdfs_cold]
+tcfs_cold = tcfs_cold + [Correlate(i[1])[:tau] for i in cdfs_cold]
+tcfs_hot = [Correlate(i[0])[:tau] for i in cdfs_hot]
+tcfs_hot = tcfs_hot + [Correlate(i[1])[:tau] for i in cdfs_hot]
+time = range(tau)
 
-# start with a spectrum and work backwards
-# first, let's create a simple gaussian distribution of frequencies
-gaussian = lambda x: 3*exp(-(1050-x)**2/5.5)
-#dw = 1
-spectrum = [gaussian(i) for i in range(2000)]
+avg_tcf_cold = AverageTCF(tcfs_cold)
+avg_tcf_hot = AverageTCF(tcfs_hot)
 
-sqrt_spectrum = numpy.array([sqrt(s) for s in spectrum])
-sqrt_spectrum = [s/(w+1)*1.0j for s,w in zip(sqrt_spectrum,range(2000))]
-#files_hot = glob.glob('[6-9]/'+filename)
-#files_hot = files_hot + glob.glob('10/'+filename)
-#axs = TCFAxis(1)
-#axs.set_xlabel(r'Time / ps', fontsize='64')
-#axs.set_ylabel('Bondlength', fontsize='64')
-#axs.plot(time, tf)
+axs = TCFAxis(1)
+axs.set_xlabel(r'Time / ps', fontsize='64')
+axs.set_ylabel('Lag', fontsize='64')
+axs.plot(time,avg_tcf_cold)
+axs.plot(time,avg_tcf_hot)
 
-#PlotFiles (glob.glob(filename), axs, 'Temp')
-#PlotFiles (files_cold, axs, [0], ['oh'])
-#PlotFiles (files_hot, axs, 'Hot')
+freqs_cold,spectrum_cold,smooth_spectrum_cold = PowerSpectrum(avg_tcf_cold)
+freqs_hot,spectrum_hot,smooth_spectrum_hot = PowerSpectrum(avg_tcf_hot)
 
-#xticks(fontsize=40)
-#yticks([])
-#plt.xlim(2800,4000)
+axs = PowerSpectrumAxis(2)
+axs.set_xlabel(r'Frequency / cm$^{-1}$', fontsize='64')
+axs.set_ylabel('Power Spectrum', fontsize='64')
+#xticks(fontsize=36)
+#yticks(fontsize=28)
+axs.plot(freqs_cold,smooth_spectrum_cold)
+axs.plot(freqs_hot,smooth_spectrum_hot)
+axs.set_xlim(2800,4000)
 
-#PlotUtility.ShowLegend(axs)
 plt.show()

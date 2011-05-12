@@ -35,7 +35,7 @@ def PlotFiles (files, axs, lbl):
 	
 	# perform the cross correlation of the polarizability with the dipole in the SSP regime
 	#ccf = numpy.array([ManualCorrelate(operator.mul, tau, alpha, mu) for tau in range(correlation_tau)])
-	ccfs_xx = [numpy.array(NewCorr(alpha,mu)[:correlation_tau]) for alpha,mu in zip(alphas_xx,mus)]	 # using the new routine
+	ccfs_xx = [numpy.array(Correlate(alpha,mu)[:correlation_tau]) for alpha,mu in zip(alphas_xx,mus)]	 # using the new routine
 	ccfs_yy = [numpy.array(NewCorr(alpha,mu)[:correlation_tau]) for alpha,mu in zip(alphas_yy,mus)]	 # using the new routine
 	ccfs = ccfs_xx + ccfs_yy
 	avg_ccf = numpy.array(reduce(operator.add,ccfs))/2.0/len(ccfs)
