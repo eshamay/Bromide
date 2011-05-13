@@ -142,5 +142,5 @@ def PowerSpectrum(data):
 	fft = numpy.array(numpy.fft.fft(smooth_data))
 	fft = fft * freqs
 	spectrum = abs(fft) * abs(fft)
-	smooth_spectrum = Smoothing.window_smooth(spectrum, window_len=5)
+	smooth_spectrum = Smoothing.window_smooth(spectrum, window='hamming', window_len=15)
   	return (freqs,spectrum,smooth_spectrum)
