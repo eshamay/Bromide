@@ -56,6 +56,34 @@ def PlotFiles(files, axs, cols, lbl):
 	for s in spectra:
 		axs.plot (s[0], s[1], linewidth=1.5)
 
+files = glob.glob('oco[1-2].dat')
+
+cdfs = [CDF(f) for f in files]
+
+axs = TCFAxis(1)
+axs.set_xlabel(r'Time / ps', fontsize='64')
+axs.set_ylabel('Bondlength', fontsize='64')
+for cdf in cdfs:
+        axs.plot(numpy.array(range(len(cdf[1])))*0.75, cdf[1])
+
+tcfs = [Correlate(i[1]) for i in cdfs]
+
+axs = TCFAxis(2)
+axs.set_xlabel(r'Time Lag / ps', fontsize='64')
+axs.set_ylabel('TCF', fontsize='64')
+for t in tcfs:
+        axs.plot(numpy.array(range(len(t)))*0.75,t)
+
+axs = PowerSpectrumAxis(3)
+axs.set_xlabel(r'Frequency / cm$^{-1}$', fontsize='64')
+axs.set_ylabel('Power Spectrum', fontsize='64')
+for t in tcfs:
+        freqs_cold,spectrum_cold,smooth_spectrum_cold = PowerSpectrum(t)
+        axs.plot(freqs_cold,smooth_spectrum_cold)
+        
+#axs.set_xlim(2800,4000)
+
+'''
 filename = 'h2o-bondlengths.normal_modes.dat'
 #filename='so2-bond+angles.dat'
 files_cold = glob.glob('[1-5]/'+filename)
@@ -97,5 +125,6 @@ axs.set_ylabel('Power Spectrum', fontsize='64')
 axs.plot(freqs_cold,smooth_spectrum_cold)
 axs.plot(freqs_hot,smooth_spectrum_hot)
 axs.set_xlim(2800,4000)
+'''
 
 plt.show()

@@ -10,7 +10,7 @@ import PlotUtility
 
 
 #files = glob.glob(sys.argv[1])
-files = glob.glob('dat/'+sys.argv[1]+'*.dat')
+files = glob.glob('[1-5]/'+sys.argv[1]+'*.dat')
 cdfs = [CDF(f) for f in files]
 
 xmin = min(cdfs[0][0])
@@ -45,8 +45,8 @@ im = plt.imshow(zi, extent=(xmin,xmax,ymax,ymin), interpolation='bilinear', figu
 
 
 xticks(fontsize=48)
-plt.xlim(-10.0,10.0)
-plt.xlabel (r'Distance to water slab surface / $\AA$', fontsize=64)
+#plt.xlim(1.4,15.0)
+plt.xlabel (r'Distance to sulfur dioxide/ $\AA$', fontsize=64)
 
 
 name = cdfs[0].filename
