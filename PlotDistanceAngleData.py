@@ -18,7 +18,7 @@ xmax = max(cdfs[0][0])
 ymin = min(cdfs[0][1])
 ymax = max(cdfs[0][1])
 
-xnum=50
+xnum=100
 ynum=100
 xi = linspace (xmin, xmax, num=xnum)
 yi = linspace (ymin, ymax, num=ynum)
@@ -31,7 +31,7 @@ for c in cdfs:
 	zi = zi + new_data
 
 # normalize to max = 1, min = 0
-zi = zi / zi.max(0)
+#zi = zi / zi.max(0)
 
 fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
 im = plt.imshow(zi, extent=(xmin,xmax,ymax,ymin), interpolation='bilinear', figure=fig, aspect='auto')
