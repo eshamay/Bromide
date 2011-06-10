@@ -6,8 +6,10 @@ from pylab import *
 import numpy
 import PlotUtility
 
-files = glob.glob('[6-9]/'+sys.argv[1]+'*')
-files = files + glob.glob('10/'+sys.argv[1]+'*')
+#files = glob.glob(sys.argv[1])
+files = glob.glob('[1-5]/'+sys.argv[1]+'*')
+#files = glob.glob('[6-9]/'+sys.argv[1]+'*')
+#files = files + glob.glob('10/'+sys.argv[1]+'*')
 cdfs = [CDF(f) for f in files]
 
 xmin = min(cdfs[0][0])

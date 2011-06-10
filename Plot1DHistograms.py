@@ -22,8 +22,8 @@ def PlotFiles(files):
 	
 	axs.plot(xi,yi)
 
-files_cold = glob.glob(sys.argv[1])
-#files_cold = glob.glob('[1-5]/'+sys.argv[1]+'*')
+#files_cold = glob.glob(sys.argv[1])
+files_cold = glob.glob('[1-5]/'+sys.argv[1]+'*')
 #files_hot = glob.glob('[6-9]/'+sys.argv[1]+'*')
 #files_hot = files_hot + glob.glob('10/'+sys.argv[1]+'*')
 
