@@ -10,6 +10,7 @@ import PlotUtility
 files = glob.glob('[1-5]/'+sys.argv[1]+'*')
 #files = glob.glob('[6-9]/'+sys.argv[1]+'*')
 #files = files + glob.glob('10/'+sys.argv[1]+'*')
+
 cdfs = [CDF(f) for f in files]
 
 xmin = min(cdfs[0][0])
@@ -26,7 +27,6 @@ zi = numpy.zeros((ynum,xnum))
 
 for c in cdfs:
 	new_data = numpy.array(griddata(c[0], c[1], c[2], xi, yi))
-	#new_data = new_data / new_data.max(0)	# old normalization scheme - doesn't really work or make sense
 	zi = zi + new_data
 
 # normalize to max = 1, min = 0
@@ -34,6 +34,11 @@ for c in cdfs:
 
 fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
 im = plt.imshow(zi, extent=(xmin,xmax,ymax,ymin), interpolation='bilinear', figure=fig, aspect='auto')
+xticks(fontsize=48)
+yticks(fontsize=48)
+axs = plt.gca()
+axs.set_xlabel(r'$\theta$ / degrees', fontsize='64')
+axs.set_ylabel(r'$\phi$ / degrees', fontsize='64')
 
 
 #xticks(fontsize=48)
