@@ -14,6 +14,7 @@ from PlotPowerSpectra import *
 import PlotUtility
 import Smoothing
 import operator
+from pylab import *
 
 #import matplotlib.pyplot as plt
 # the extents of the x-range
@@ -48,8 +49,9 @@ def PlotMorita (files,axs):
 	freqs,spectrum,smooth_spectrum = PowerSpectrum(avg_ccf)
   	smooth_spectrum = smooth_spectrum/smooth_spectrum.max()
 
-	axs.plot (freqs, smooth_spectrum, linewidth=2.5)
-	plt.xlim (2800,4000)
+	axs.plot (freqs[300:-300], smooth_spectrum[300:-300], linewidth=2.5)
+	plt.xlim (500,4000)
+	plt.ylim (-0.05,1.2)
 
 	
 files_cold = glob.glob('[1-5]/sfg.top10.dat')
@@ -58,5 +60,8 @@ files_hot = glob.glob('[6-9]/sfg.top10.dat')
 axs = PowerSpectrumAxis(2)
 PlotMorita(files_cold,axs)
 PlotMorita(files_hot,axs)
+
+xticks(fontsize=48)
+yticks([])
 
 plt.show()
