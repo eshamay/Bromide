@@ -50,11 +50,11 @@ plt.xlabel (r'Distance to sulfur dioxide/ $\AA$', fontsize=64)
 
 
 name = cdfs[0].filename
-if "theta" in name:
+if "theta" in name or "alpha" in name:
 	plt.ylabel (r'$\cos(\theta)$', fontsize=64)
 	plt.ylim(-1.0,1.0)
 	yticks([-1.0,-0.5,0.0,0.5,1.0], fontsize=48)
-elif "phi" in name:
+elif "phi" in name or "beta" in name:
 	plt.ylabel (r'$\cos(\phi)$', fontsize=64)
 	plt.ylim(0.0,1.0)
 	yticks([0.0,0.25,0.5,0.75,1.0], fontsize=48)

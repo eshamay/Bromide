@@ -14,7 +14,9 @@ from PlotPowerSpectra import *
 import PlotUtility
 import Smoothing
 import operator
-import csv
+#import csv
+#from pylab import *
+
 #import matplotlib.pyplot as plt
 
 # the extents of the x-range
@@ -52,12 +54,19 @@ def PlotMorita (files,axs):
 	#dataWriter= csv.writer(open('temp.csv', 'w'), delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
   	half = len(freqs)/2
-	axs.plot (freqs[:half-1], smooth_spectrum[:half-1], linewidth=2.5)
-	plt.xlim (2800,4000)
+	axs.plot (freqs[:half-1], smooth_spectrum[:half-1], linewidth=3.0)
+
+	plt.xticks(fontsize=48)
   	plt.yticks([])
+
+	plt.xlim (3000,4000)
   	plt.ylim(-0.05, 1.15)
   	
-
+	axs.set_xlabel('')
+	axs.set_ylabel('')
+	#axs.set_xlabel(r'Frequency / cm$^{-1}$', size=64)
+	#axs.set_ylabel(r'$|\chi^{(2)}|^2$', size=64)
+  	
 	
 files_cold = glob.glob('[1-5]/sfg.top10.dat')
 files_hot = glob.glob('[6-9]/sfg.top10.dat')
