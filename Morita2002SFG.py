@@ -14,8 +14,9 @@ from PlotPowerSpectra import *
 import PlotUtility
 import Smoothing
 import operator
-
+import csv
 #import matplotlib.pyplot as plt
+
 # the extents of the x-range
 tau = 20000	# length of the correlation function
 
@@ -47,9 +48,15 @@ def PlotMorita (files,axs):
 
 	freqs,spectrum,smooth_spectrum = PowerSpectrum(avg_ccf)
   	smooth_spectrum = smooth_spectrum/smooth_spectrum.max()
+  	
+	#dataWriter= csv.writer(open('temp.csv', 'w'), delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
 
-	axs.plot (freqs, smooth_spectrum, linewidth=2.5)
+  	half = len(freqs)/2
+	axs.plot (freqs[:half-1], smooth_spectrum[:half-1], linewidth=2.5)
 	plt.xlim (2800,4000)
+  	plt.yticks([])
+  	plt.ylim(-0.05, 1.15)
+  	
 
 	
 files_cold = glob.glob('[1-5]/sfg.top10.dat')
