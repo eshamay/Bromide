@@ -63,8 +63,8 @@ def PrintStats (name, data):
 
 new_bins = []
 num_bins = 4
-for i in range(num_bins):
-  for j in range(num_bins):
+for i in range(4):
+  for j in range(3):
 			new_bins.append(i + 10*j)
 new_bins.sort()
 print new_bins
@@ -95,6 +95,8 @@ plt.bar([i+width for i in range(len(new_bins[:-1]))], hot_histo, width, color='r
 PrintStats('Cold', hot_histo)
 
 new_bins = [CoordinationNumberToName(i) for i in new_bins]
-xticks(arange(len(new_bins)), new_bins)
+xticks(arange(len(new_bins)), new_bins, fontsize=26, rotation=90)
+#fig.autofmt_xdate()
+yticks([])
 
 plt.show()
