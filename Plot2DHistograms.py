@@ -16,7 +16,7 @@ def PlotFiles (files,fig):
 	ymax = max(cdfs[0][1])
 
 	xnum=180
-	ynum=60
+	ynum=80
 	xi = linspace (xmin, xmax, num=xnum)
 	yi = linspace (ymin, ymax, num=ynum)
 
@@ -27,18 +27,18 @@ def PlotFiles (files,fig):
 		zi = zi + new_data
 
 	# normalize to max = 1, min = 0
-	#zi = zi / zi.max(0)
+	zi = zi / zi.max(0)
 
 	im = plt.imshow(zi, extent=(xmin,xmax,ymax,ymin), interpolation='bilinear', figure=fig, aspect='auto')
 
 	return zi, im
 
 
-#files = glob.glob(sys.argv[1])
-files_cold = glob.glob('[1-5]/'+sys.argv[1]+'*')
-files_hot = glob.glob('[6-9]/'+sys.argv[1]+'*')
-files_hot = files_hot + glob.glob('10/'+sys.argv[1]+'*')
-
+files_cold = glob.glob(sys.argv[1])
+#files_cold = glob.glob('[1-5]/'+sys.argv[1]+'*')
+#files_hot = glob.glob('[6-9]/'+sys.argv[1]+'*')
+#files_hot = files_hot + glob.glob('10/'+sys.argv[1]+'*')
+#
 fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
 zi_cold,im_cold = PlotFiles (files_cold,fig)
 xticks(fontsize=48)
@@ -47,8 +47,8 @@ axs = plt.gca()
 axs.set_xlabel(r'$\theta$ / degrees', fontsize='64')
 axs.set_ylabel(r'O$_{SO_2}$-H$_{H_2O}$ Distance / $\AA$', fontsize='64')
 
-fig = plt.figure(num=2, facecolor='w', edgecolor='w', frameon=True)
-zi_hot,im_hot = PlotFiles (files_hot,fig)
+#fig = plt.figure(num=2, facecolor='w', edgecolor='w', frameon=True)
+#zi_hot,im_hot = PlotFiles (files_hot,fig)
 
 #fig = plt.figure(num=3, facecolor='w', edgecolor='w', frameon=True)
 #im = plt.imshow(zi_hot - zi_cold, extent=(0.0,180.0,3.0,0.0), interpolation='bilinear', figure=fig, aspect='auto')
