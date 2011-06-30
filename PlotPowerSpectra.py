@@ -4,31 +4,27 @@ import matplotlib.pyplot as plt
 import Smoothing
 import AutoCorrelation
 import operator
-import glob
 
 ### Some constants for the calculations ###
 # speed of light in cm/s
 c = 29979245800.0 
 # planck's
-#k = 1.3806504e-23
-#hbar = 1.05457148e-34
+k = 1.3806504e-23
+hbar = 1.05457148e-34
 # timestep of the simulation
-#dt = 0.75e-15
 dt = 0.75e-15
 correlation_tau = 8000
-#T = 340.0	# in kelvin
-#Beta = 1/(k*T)
+T = 300.0	# in kelvin
+Beta = 1/(k*T)
 
 #########********** Do the time-domain work here - calculate the ACF/TCFs **********############
 #########                                                                           ############
 
-def AutoCorr1d(x):
-  return AutoCorrelation.fftCyclicAutocorrelation1D(x)
+def WindowFunction(data):
+	return numpy.hanning(len(data))
 
-def AverageTCF(tcf):
-  N = len(tcf)
-  tcf = [tcf[i] / (N-i) for i in range(len(tcf))]
-  return numpy.array(tcf)
+def SmoothFunction(data):
+	return WindowFunction(data) * data
 
 def FreqAxis(N,dt):
   return numpy.array(numpy.fft.fftfreq(n=N, d=dt))/c
@@ -42,23 +38,71 @@ def FFT(tcf):
   freqs = FreqAxis(len(tcf),dt)
   return numpy.array(freqs*freqs*abs(fft)*abs(fft))
 
-def NewCorr(x,y=None):
+''' compute either the cross-correlation or the autocorrelation of time functions '''
+''' equivalent to the methods used in the NIST engineering handbook:
+		http://itl.nist.gov/div898/handbook/eda/section3/eda35c.htm
+'''
+def Correlate(x,y=None):
 	ret = []
+	x = x - numpy.average(x)
 	if y == None:	# the autocorrelation case
 		ret = numpy.array(numpy.correlate(x,x,"full"))[::-1]	# reverse the list with [::-1]
 	else:	# cross-correlate x and y
+		y = y - numpy.average(y)
 		ret = numpy.array(numpy.correlate(x,y,"full"))[::-1]
 
 	ret = ret[len(ret)/2:]	# only take the 1st half of the result (2nd half is just reversed)
-	ret = [n / (len(ret)-tau) for n,tau in zip(ret,range(len(ret)))]	# do the ensemble average over the time lags
-	return ret
+	#ret = [n / (len(ret)-tau) for n,tau in zip(ret,range(len(ret)))]	# do the ensemble average over the time lags
+	return ret/ret[0]
 
-	''' The original brute-force method -- pretty slow '''
+
+''' 	Brute-force direct calculation from the nist reference above
+def autocovariance (x,lag,mean_x,y=None,mean_y=None):
+	x = numpy.array(x) - mean_x
+
+	sum = 0.0
+  	if y == None:
+		for i in range(len(x)-lag):
+	  		sum = sum + x[i]*x[i+lag]
+	else:
+		y = numpy.array(y) - mean_y
+		for i in range(len(x)-lag):
+		  	sum = sum + x[i]*y[i+lag]
+	
+	return sum/(len(x)-lag)
+'''
+
+
+'''
+def covariance(x,y=None):
+  	ret = 0.0
+	if y == None:
+	  	ret = numpy.std(x) * numpy.std(x)
+	else:
+	  	ret = numpy.std(x) * numpy.std(y)
+'''
+
+'''
+	ret = 0.0
+	x = numpy.array(x) - mean_x
+	sum_x = 0.0
+  	for i in range(len(x)):
+		sum_x = sum_x + x[i]*x[i]
+	ret = sum_x
+
+	sum_y = 0.0
+	if y != None:
+	  	y = numpy.array(y) - mean_y
+		for i in range(len(y)):
+		  	sum_y = sum_y + y[i]*y[i]
+		ret = numpy.sqrt(sum_x*sum_y)
+	return ret
+'''
+''' The original brute-force method -- pretty slow '''
+'''
 def ManualCorrelate(func,tau,x,y=None):
 	Nstep = float(len(x))
-	Ncorr = tau
-	Nshift = 1
-	Nav = int((Nstep-Ncorr)/Nshift)
+	Nav = int(Nstep-tau)
 
 	d = 0.0
 	for n in range(Nav):
@@ -67,116 +111,36 @@ def ManualCorrelate(func,tau,x,y=None):
 		else:
 			d = d + func(x[n], y[Ncorr+n])	# Cross correlation
 	return numpy.array(d)/float(Nav)		# ensemble averaging
+'''
 
 
-def vectorAutocorr(x,tau):
-	ManualAutocorr(numpy.dot,x,tau)
-
-def ScalarAutocorr(x,tau):
-	ManualAutocorr(operator.mul, tau, x)
-
-def TCFAxis():
+def TCFAxis(fig_num=1):
 	# plot the tcf
-	fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
+	fig = plt.figure(num=fig_num, facecolor='w', edgecolor='w', frameon=True)
 	axs = fig.add_subplot(1,1,1)
 	axs.set_ylabel(r'ACF', size='xx-large')
 	axs.set_xlabel(r'Timestep', size='xx-large')
 	return axs
 
-def PlotTCF(tcf,axs):
-	#axs = TCFAxis()
-	axs.plot(range(len(tcf)), tcf, linewidth=3.0, color='k')
-
 def AverageTCFs(tcfs):
 	avg_tcf = numpy.array(reduce(operator.add,tcfs))/len(tcfs)
 	return avg_tcf
 
-def LoadCDFs(files):
-	# load the column-data files
-	return [CDF(f) for f in files]
-
-def ParseColumnFileData(cdfs,cols):
-	data = []
-	for cdf in cdfs:
-		for col in range(cols):
-			data.append (numpy.array(cdf[col]))
-	return data
-
-def PowerSpectrumAxis():
+def PowerSpectrumAxis(n):
 	# Set up the figure for the spectral plots
-	fig = plt.figure(num=None, facecolor='w', edgecolor='w', frameon=True)
+	fig = plt.figure(num=n, facecolor='w', edgecolor='w', frameon=True)
 	#axs = fig.add_subplot(1,1,1, autoscaleon=False)
 	axs = plt.subplot(1,1,1)
-	axs.set_ylabel(r'Spectrum', size='xx-large')
-	axs.set_xlabel(r'Frequency / cm$^{-1}$', size='xx-large')
+	axs.set_ylabel(r'$|\chi^{(2)}|^2$', size='64')
+	axs.set_xlabel(r'Frequency / cm$^{-1}$', size='64')
 	return axs
 
-def PlotPowerSpectrum(tcf, axs):
-	#axs = PowerSpectrumAxis()
-	# use the same axis for all the spectra
-	freq_axis = FreqAxis(len(tcf),dt)
-	fft = FFT(tcf)
-	smooth = Smoothing.window_smooth(fft, window='hanning', window_len=15)
-	axs.plot(freq_axis, smooth, linewidth=3.5)
-
-
-def PlotPowerSpectra(tcfs):
-	axs = PowerSpectrumAxis()
-	# use the same axis for all the spectra
-	freq_axis = FreqAxis(len(tcfs[0]),dt)
-
-	# fft each of the individual tcfs
-	fft_tcfs = [FFT(t) for t in tcfs]
-
-	# take an average of all the ffts
-	#avg_fft = numpy.array(reduce(operator.add, fft_tcfs))/len(fft_tcfs)
-
-	for f in fft_tcfs:
-		axs.plot(freq_axis, f, linewidth=2.0)
-
-
-def LoadColumnFileData(path, num_cols):
-	files = glob.glob(path)
-	cdfs = LoadCDFs(files)
-	data = ParseColumnFileData(cdfs,num_cols)
-	return data
-
-
-def CalcAverageTCFFromFiles(path, num_cols):
-	data = LoadColumnFileData(path, num_cols)
-	tcfs = [numpy.array(AutoCorr1d(d)) for d in data]
-	avg = AverageTCFs(tcfs)
-	return avg
-
-
-
-
-'''
-#########********** Do the time-domain work here - calculate the TCFs of the data files ********############
-#########                                                                                       ############
-
-#bond_avg = CalcAverageTCFFromFiles('[1-5]/so2-bondlengths.dat', 2)
-#angle_avg = CalcAverageTCFFromFiles('[1-5]/so2-angles.dat', 1)
-#closest_water_oh_avg = CalcAverageTCFFromFiles('[1-5]/closest-water-bondlengths.dat', 6)
-closest_water_oh_avg = CalcAverageTCFFromFiles('[1-5]/closest-water-bondlengths.dat', 1)
-second_closest_water_oh_avg = CalcAverageTCFFromFiles('[1-5]/2nd-closest-water-bondlengths.dat', 1)
-top_water_oh_avg = CalcAverageTCFFromFiles('[1-5]/top-water-bondlengths.dat', 1)
-#closest_water_angle_avg = CalcAverageTCFFromFiles('[1-5]/h2o-angle.dat', 3)
-
-axs = TCFAxis()
-PlotTCF(closest_water_oh_avg, axs)
-#########********** Do the frequency-domain work here - calculate the FFT of the TCFs **********############
-#########                                                                                       ############
-
-axs = PowerSpectrumAxis()
-#PlotPowerSpectrum(bond_avg, axs)
-#PlotPowerSpectrum(angle_avg, axs)
-PlotPowerSpectrum(closest_water_oh_avg, axs)
-PlotPowerSpectrum(second_closest_water_oh_avg, axs)
-PlotPowerSpectrum(top_water_oh_avg, axs)
-#PlotPowerSpectrum(closest_water_angle_avg, axs)
-
-plt.xlim(0,6000)
-#PlotUtility.ShowLegend(axs)
-plt.show()
-'''
+def PowerSpectrum(data):
+	# power spectrum
+	smooth_data = SmoothFunction(data)
+	freqs = numpy.array(numpy.fft.fftfreq(n=len(data), d=dt))/c
+	fft = numpy.array(numpy.fft.fft(smooth_data))
+	fft = fft * freqs
+	spectrum = abs(fft) * abs(fft)
+	smooth_spectrum = Smoothing.window_smooth(spectrum, window='hamming', window_len=15)
+  	return (freqs,spectrum,smooth_spectrum)

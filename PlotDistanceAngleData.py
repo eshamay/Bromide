@@ -10,7 +10,7 @@ import PlotUtility
 
 
 #files = glob.glob(sys.argv[1])
-files = glob.glob('dat/'+sys.argv[1]+'*.dat')
+files = glob.glob('[1-5]/'+sys.argv[1]+'*.dat')
 cdfs = [CDF(f) for f in files]
 
 xmin = min(cdfs[0][0])
@@ -18,7 +18,7 @@ xmax = max(cdfs[0][0])
 ymin = min(cdfs[0][1])
 ymax = max(cdfs[0][1])
 
-xnum=50
+xnum=100
 ynum=100
 xi = linspace (xmin, xmax, num=xnum)
 yi = linspace (ymin, ymax, num=ynum)
@@ -31,7 +31,7 @@ for c in cdfs:
 	zi = zi + new_data
 
 # normalize to max = 1, min = 0
-zi = zi / zi.max(0)
+#zi = zi / zi.max(0)
 
 fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
 im = plt.imshow(zi, extent=(xmin,xmax,ymax,ymin), interpolation='bilinear', figure=fig, aspect='auto')
@@ -45,16 +45,16 @@ im = plt.imshow(zi, extent=(xmin,xmax,ymax,ymin), interpolation='bilinear', figu
 
 
 xticks(fontsize=48)
-plt.xlim(-10.0,10.0)
-plt.xlabel (r'Distance to water slab surface / $\AA$', fontsize=64)
+#plt.xlim(1.4,15.0)
+plt.xlabel (r'Distance to sulfur dioxide/ $\AA$', fontsize=64)
 
 
 name = cdfs[0].filename
-if "theta" in name:
+if "theta" in name or "alpha" in name:
 	plt.ylabel (r'$\cos(\theta)$', fontsize=64)
 	plt.ylim(-1.0,1.0)
 	yticks([-1.0,-0.5,0.0,0.5,1.0], fontsize=48)
-elif "phi" in name:
+elif "phi" in name or "beta" in name:
 	plt.ylabel (r'$\cos(\phi)$', fontsize=64)
 	plt.ylim(0.0,1.0)
 	yticks([0.0,0.25,0.5,0.75,1.0], fontsize=48)
