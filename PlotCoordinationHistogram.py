@@ -22,9 +22,8 @@ def CoordinationNumberToName (number):
 	return name
 
 def ConvertNumbers(numbers):
-	#j = 261
-	#print j, 10*(int(j)/100) + (int(j)%10) + (int(j%100)/10)
-	return [10*(int(n)/100) + (int(n)%10) + (int(n%100)/10) for n in numbers]
+	#return [10*(int(n)/100) + (int(n)%10) + (int(n%100)/10) for n in numbers]
+	return [(int(n)%10) + (int(n%100)/10) for n in numbers]
 
 def ExtractCoords(files):
 	cdfs = [CDF(f) for f in files]
@@ -61,11 +60,13 @@ def PrintStats (name, data):
 	print 'SOOO = ', data[7]/total*100, '%'
 	print 'All S = ', (data[4] + data[5] + data[6] + data[7])/total*100, '%'
 
+	print data/float(data.sum())*100.0
+
 new_bins = []
 num_bins = 4
 for i in range(4):
-  for j in range(3):
-			new_bins.append(i + 10*j)
+	for j in range(3):
+		new_bins.append(i + 10*j)
 new_bins.sort()
 print new_bins
 width = 0.35
