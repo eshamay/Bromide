@@ -65,8 +65,8 @@ def PrintStats (name, data):
 new_bins = []
 num_bins = 4
 for i in range(4):
-  for j in range(4):
-			new_bins.append(i + 10*j)
+	for j in range(3):
+		new_bins.append(i + 10*j)
 new_bins.sort()
 print new_bins
 width = 0.35
@@ -83,21 +83,28 @@ fig = plt.figure(num=1, facecolor='w', edgecolor='w', frameon=True)
 data = ExtractCoords(files_cold)
 
 cold_histo, cold_bin_edges = numpy.histogram (data, bins=new_bins)
-plt.bar(range(len(new_bins[:-1])), cold_histo, width, color='b', align='center')
+cold_histo = [float(i) for i in cold_histo]
+cold_histo = numpy.array(cold_histo)
+cold_histo = cold_histo / cold_histo.sum() * 100.0
+plt.bar([i-width/2 for i in range(len(new_bins[:-1]))], cold_histo, width, color='b', align='center')
 
-PrintStats('Cold', cold_histo)
-
+#PrintStats('Cold', cold_histo)
 
 data = ExtractCoords(files_hot)
 
 hot_histo, hot_bin_edges = numpy.histogram (data, bins=new_bins)
-plt.bar([i+width for i in range(len(new_bins[:-1]))], hot_histo, width, color='r', align='center')
+hot_histo = [float(i) for i in hot_histo]
+hot_histo = numpy.array(hot_histo)
+hot_histo = hot_histo / hot_histo.sum() * 100.0
+plt.bar([i+width/2 for i in range(len(new_bins[:-1]))], hot_histo, width, color='r', align='center')
 
-PrintStats('Hot', hot_histo)
+#PrintStats('Hot', hot_histo)
 
 new_bins = [CoordinationNumberToName(i) for i in new_bins]
-xticks(arange(len(new_bins)), new_bins, fontsize=26, rotation=90)
-#fig.autofmt_xdate()
-yticks([])
+xlabel (r'SO$_2$ Coordination', fontsize=46)
+ylabel ('% of SO$_2$ Coordinations', fontsize=46)
+xticks (arange(len(new_bins)), new_bins, fontsize=24)
+yticks (fontsize=42)
 
 plt.show()
+
