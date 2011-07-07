@@ -1,3 +1,6 @@
+import operator
+import numpy
+
 '''
 A data file with columns of data (or meta-data)
 '''
@@ -64,3 +67,25 @@ class ColumnDataFile:
 
 	def __len__(self):
 		return len(self.data)
+
+
+
+
+
+
+
+class CDFGroup:
+	def __init__(self,files):
+		self.cdfs = [ColumnDataFile(f) for f in files]
+		self.num = len(files)
+		self.x_len = len(self.cdfs[0][0])
+		self.x = numpy.array(self.cdfs[0][0])
+
+	# returns an accumulation of all the files using the given columns and function
+	def Reduce1D(self, col, func=operator.add):
+	
+		yi = numpy.zeros(self.x_len)
+		cols = lambda c: numpy.array(operator.getitem(c,col))
+		yi = reduce(func, map(cols,self.cdfs))
+	
+		return (self.x,yi)
