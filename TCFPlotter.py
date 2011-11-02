@@ -15,10 +15,13 @@ class TimeFunction:
                 self.covariance = (self.data * self.data).sum()
                 self.data = self.data - self.mean
 
-		self.tcf = numpy.array(NewCorr(self.data)[:correlation_tau])/self.covariance
+		#self.tcf = numpy.array(Correlate(self.data)[:correlation_tau])/self.covariance
+		self.tcf = numpy.array(Correlate(self.data))/self.covariance
 		#self.time = numpy.array(range(len(self.tcf)))/dt*1.0e15	# in fs
 
-		(self.freqs,self.spectrum) = SmoothSpectrum(self.tcf)
+		self.freqs = FreqAxis(len(self.tcf))
+		self.spectrum = FFT(self.tcf)
+		#(self.freqs,self.spectrum) = SmoothSpectrum(self.tcf)
 
 	def TCF(self):
 		return self.tcf
@@ -56,6 +59,7 @@ def PlotFiles(files, axs, cols, lbl):
 	for s in spectra:
 		axs.plot (s[0], s[1], linewidth=1.5)
 
+'''
 files = glob.glob('oco[1-2].dat')
 
 cdfs = [CDF(f) for f in files]
@@ -82,6 +86,7 @@ for t in tcfs:
         axs.plot(freqs_cold,smooth_spectrum_cold)
         
 #axs.set_xlim(2800,4000)
+'''
 
 '''
 filename = 'h2o-bondlengths.normal_modes.dat'
@@ -127,4 +132,4 @@ axs.plot(freqs_hot,smooth_spectrum_hot)
 axs.set_xlim(2800,4000)
 '''
 
-plt.show()
+#plt.show()
