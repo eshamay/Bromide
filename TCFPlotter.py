@@ -5,7 +5,7 @@ import glob
 import matplotlib.pyplot as plt
 
 c = 29979245800.0		# speed of light (cm/s)
-dt = 0.75e-15	# length of time between each simulation data point
+dt = 1.0e-15	# length of time between each simulation data point
 tau = 20000	# length of the correlation function
 
 class TimeFunction:
@@ -16,10 +16,10 @@ class TimeFunction:
                 self.data = self.data - self.mean
 
 		#self.tcf = numpy.array(Correlate(self.data)[:correlation_tau])/self.covariance
-		self.tcf = numpy.array(Correlate(self.data))/self.covariance
+		self.tcf = numpy.array(Correlate(self.data))[:tau]/self.covariance
 		#self.time = numpy.array(range(len(self.tcf)))/dt*1.0e15	# in fs
 
-		self.freqs = FreqAxis(len(self.tcf))
+		self.freqs = FreqAxis(len(self.tcf),dt)
 		self.spectrum = FFT(self.tcf)
 		#(self.freqs,self.spectrum) = SmoothSpectrum(self.tcf)
 
