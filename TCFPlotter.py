@@ -11,17 +11,23 @@ tau = 20000	# length of the correlation function
 class TimeFunction:
 	def __init__(self, data):
 		self.data = numpy.array(data)
-                self.mean = numpy.average(data)
-                self.covariance = (self.data * self.data).sum()
-                self.data = self.data - self.mean
+		self.mean = numpy.average(self.data)
+		self.covariance = (self.data * self.data).sum()
+		adjusted_data = self.data - self.mean
 
 		#self.tcf = numpy.array(Correlate(self.data)[:correlation_tau])/self.covariance
-		self.tcf = numpy.array(Correlate(self.data))[:tau]/self.covariance
+		#self.tcf = numpy.array(Correlate(adjusted_data))[:tau]/self.covariance
+		#self.tcf = numpy.array(Correlate(adjusted_data))[:15000]/self.covariance
+		self.tcf = numpy.array(Correlate(adjusted_data))/self.covariance
 		#self.time = numpy.array(range(len(self.tcf)))/dt*1.0e15	# in fs
 
 		self.freqs = FreqAxis(len(self.tcf),dt)
 		self.spectrum = FFT(self.tcf)
+		self.smooth_spectrum = Smoothing.window_smooth(self.spectrum, window='hamming', window_len=20)
 		#(self.freqs,self.spectrum) = SmoothSpectrum(self.tcf)
+
+	def Data(self):
+		return self.data
 
 	def TCF(self):
 		return self.tcf
@@ -32,6 +38,12 @@ class TimeFunction:
 	def Spectrum(self):
 		return self.spectrum
 
+	def SmoothSpectrum(self):
+		return self.smooth_spectrum
+
+	def __len__(self):
+		return len(self.data)
+
 
 def AverageTCF (tcfs):
 	sum_tcf = numpy.array(reduce(operator.add, tcfs))
@@ -41,7 +53,7 @@ def AverageTCF (tcfs):
 def PlotFiles(files, axs, cols, lbl):
 	cdfs = [CDF(i) for i in files]
 
-        # each column gets its own time function
+				# each column gets its own time function
 	tfs = [[TimeFunction(c[i]) for c in cdfs] for i in cols]
 
 	# calculate the correlation of each time function
@@ -68,7 +80,7 @@ axs = TCFAxis(1)
 axs.set_xlabel(r'Time / ps', fontsize='64')
 axs.set_ylabel('Bondlength', fontsize='64')
 for cdf in cdfs:
-        axs.plot(numpy.array(range(len(cdf[1])))*0.75, cdf[1])
+				axs.plot(numpy.array(range(len(cdf[1])))*0.75, cdf[1])
 
 tcfs = [Correlate(i[1]) for i in cdfs]
 
@@ -76,15 +88,15 @@ axs = TCFAxis(2)
 axs.set_xlabel(r'Time Lag / ps', fontsize='64')
 axs.set_ylabel('TCF', fontsize='64')
 for t in tcfs:
-        axs.plot(numpy.array(range(len(t)))*0.75,t)
+				axs.plot(numpy.array(range(len(t)))*0.75,t)
 
 axs = PowerSpectrumAxis(3)
 axs.set_xlabel(r'Frequency / cm$^{-1}$', fontsize='64')
 axs.set_ylabel('Power Spectrum', fontsize='64')
 for t in tcfs:
-        freqs_cold,spectrum_cold,smooth_spectrum_cold = PowerSpectrum(t)
-        axs.plot(freqs_cold,smooth_spectrum_cold)
-        
+				freqs_cold,spectrum_cold,smooth_spectrum_cold = PowerSpectrum(t)
+				axs.plot(freqs_cold,smooth_spectrum_cold)
+				
 #axs.set_xlim(2800,4000)
 '''
 
